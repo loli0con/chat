@@ -38,8 +38,11 @@ public class ChatServerThread extends Thread {
                     case "300": // 300: 客户端获取已上线的所有用户
                         doAllOnlineUser(br);
                         break;
-                    case "301": // 300: 客户端获取上线用户根据用户名升序排序
+                    case "301": // 301: 客户端获取上线用户根据用户名升序排序
                         doAllOnlineUserOrderByUserName(br);
+                        break;
+                    case "302": // 302: 获取指定性别的上线用户
+                        doAllOnlineUserFilterBySex(br);
                         break;
                 }
             }
