@@ -118,7 +118,6 @@ public class ChatServerThread extends Thread {
             sendMsgToCurrentSocket("恭喜您:" + userName + ", 注册成功!");
         } else {
             sendMsgToCurrentSocket(userName + "用户已经存在，注册失败!");
-
         }
     }
 
