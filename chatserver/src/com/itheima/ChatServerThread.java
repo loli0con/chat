@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.*;
 
 public class ChatServerThread extends Thread {
-    private Socket socket;
+    private final Socket socket;
 
     public ChatServerThread(Socket socket) {
         this.socket = socket;
@@ -27,6 +27,7 @@ public class ChatServerThread extends Thread {
                     case "100":
                         doLogin(br);
                         break;
+
                     case "200": // 200: 表示单聊
                         doSingleChat(br);
                         break;
