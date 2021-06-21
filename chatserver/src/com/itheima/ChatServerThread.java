@@ -35,7 +35,7 @@ public class ChatServerThread extends Thread {
                         doLogin(br);
                         break;
                     case "101": // 101: 表示注册
-                        // TODO
+                        doRegister(br);
                         break;
 
                     case "200": // 200: 表示单聊
