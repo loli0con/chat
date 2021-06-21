@@ -46,13 +46,14 @@ public class CommandReader extends Thread {
         try {
             // 获取Socket的输出流转成打印流,方便一次打印一行数据
             PrintStream ps = new PrintStream(socket.getOutputStream());
-
             Scanner sc = new Scanner(System.in);
             // 用户可以循环操作
             while (true) {
                 if (Thread.currentThread().isInterrupted()) {
-                    socket.shutdownOutput();
-                    socket.close();
+                    if (!socket.isOutputShutdown()) {
+                        socket.getOutputStream().flush();
+                        socket.shutdownOutput();
+                    }
                     break;
                 }
                 // 3.打印操作信息
@@ -241,8 +242,6 @@ public class CommandReader extends Thread {
 
     // 9.退出
     private void closeClient() throws IOException {
-        socket.getOutputStream().flush();
-        socket.shutdownOutput();
         Thread.currentThread().interrupt();
     }
 }

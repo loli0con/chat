@@ -23,7 +23,9 @@ public class ChatClient {
             chatClientReaderThread.start();
 
             chatClientReaderThread.join();
-            commandReader.interrupt();
+            if (!commandReader.isInterrupted()) {
+                commandReader.interrupt();
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

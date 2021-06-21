@@ -24,6 +24,9 @@ public class ChatClientReaderThread extends Thread {
                 out.write(msg + "\n");
             }
             socket.shutdownInput();
+            if (socket.isOutputShutdown()) {
+                socket.close();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
