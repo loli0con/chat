@@ -25,7 +25,7 @@ public class ChatServerThread extends Thread {
                 String flag = br.readLine();
                 // 拦截游客访问用户的功能
                 if (!hasLogin() && Arrays.asList(signal_arr).contains(flag)) {
-                    sendMsgToCurrentGuest("尚未登录，无法访问该功能");
+                    sendMsgToCurrentSocket("尚未登录，无法访问该功能");
                     continue;
                 }
                 System.out.println(flag);
@@ -45,7 +45,7 @@ public class ChatServerThread extends Thread {
                         doAllChat(br);
                         break;
                     case "202": // 202: 表示随机聊
-                        // TODO
+                        doRandomChat(br);
                         break;
 
                     case "300": // 300: 客户端获取已上线的所有用户
@@ -93,10 +93,10 @@ public class ChatServerThread extends Thread {
         }
 
         if (Objects.isNull(targetUser)) {
-            sendMsgToCurrentGuest("该用户不存在, 请确认用户名是否正确");
+            sendMsgToCurrentSocket("该用户不存在, 请确认用户名是否正确");
         } else {  // 用户存在
             if (!targetUser.getPassword().equals(password)) {
-                sendMsgToCurrentGuest("密码错误");
+                sendMsgToCurrentSocket("密码错误");
             } else { //密码正确
                 ChatServer.allSocketOnLine.put(socket, targetUser);
                 // 发送在线用户给所有人
@@ -115,9 +115,9 @@ public class ChatServerThread extends Thread {
 
         User new_user = new User(userName, sex, age, password);
         if (ChatServer.users.add(new_user)) {
-            sendMsgToCurrentGuest("恭喜您:" + userName + ", 注册成功!");
+            sendMsgToCurrentSocket("恭喜您:" + userName + ", 注册成功!");
         } else {
-            sendMsgToCurrentGuest(userName + "用户已经存在，注册失败!");
+            sendMsgToCurrentSocket(userName + "用户已经存在，注册失败!");
 
         }
     }
@@ -144,7 +144,14 @@ public class ChatServerThread extends Thread {
 
     // 202: 随机聊
     private void doRandomChat(BufferedReader br) throws Exception {
-        // TODO
+        String privateMsg = br.readLine();
+        Socket socket = ChatServer.allSocketOnLine.keySet().stream()
+                .filter(sock -> sock == this.socket)
+                .skip(new Random().nextInt(ChatServer.allSocketOnLine.size() - 1))
+                .findFirst()
+                .orElse(this.socket);
+        String userName = ChatServer.allSocketOnLine.get(socket).getUserName();
+        sendMsgToOneUser(userName, privateMsg);
     }
 
 
@@ -202,7 +209,7 @@ public class ChatServerThread extends Thread {
      *
      * @param privateMsg 单聊的消息
      */
-    private void sendMsgToCurrentGuest(String privateMsg) throws Exception {
+    private void sendMsgToCurrentSocket(String privateMsg) throws Exception {
         PrintStream ps = new PrintStream(socket.getOutputStream());
         ps.println(privateMsg);
         ps.flush();
