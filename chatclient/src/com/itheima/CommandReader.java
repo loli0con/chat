@@ -59,6 +59,9 @@ public class CommandReader extends Thread {
             Scanner sc = new Scanner(System.in);
             // 用户可以循环操作
             while (true) {
+                if (Thread.currentThread().isInterrupted()) {
+                    break;
+                }
                 // 3.打印操作信息
                 System.out.println("1.登陆");
                 System.out.println("2.注册");
@@ -73,7 +76,7 @@ public class CommandReader extends Thread {
 
                 // 4.使用Scanner进行键盘输入
                 String operation = sc.nextLine();
-                System.out.println(operation);
+                // System.out.println(operation);
                 // 判断消息类型
                 switch (operation) {
                     case "1": // 1.表示登陆
@@ -199,7 +202,7 @@ public class CommandReader extends Thread {
 
     // 5.表示随机聊
     private void sendSomeone(PrintStream ps) {
-        System.out.println("进入单聊");
+        System.out.println("进入随机聊");
         Scanner sc = new Scanner(System.in);
 
         System.out.println("请输入消息：");
@@ -247,5 +250,6 @@ public class CommandReader extends Thread {
     private void closeClient() throws IOException {
         socket.getOutputStream().flush();
         socket.shutdownOutput();
+        Thread.currentThread().interrupt();
     }
 }

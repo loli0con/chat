@@ -81,6 +81,7 @@ public class ChatServerThread extends Thread {
             } catch (Exception exception) {
                 exception.printStackTrace();
             }
+            e.printStackTrace();
         }
     }
 
@@ -152,13 +153,17 @@ public class ChatServerThread extends Thread {
 
     // 202: 随机聊
     private void doRandomChat(BufferedReader br) throws Exception {
+        int size = ChatServer.allSocketOnLine.size();
         String privateMsg = br.readLine();
-        Socket socket = ChatServer.allSocketOnLine.keySet().stream()
-                .filter(sock -> sock == this.socket)
-                .skip(new Random().nextInt(ChatServer.allSocketOnLine.size() - 1))
-                .findFirst()
-                .orElse(this.socket);
-        String userName = ChatServer.allSocketOnLine.get(socket).getUserName();
+        Socket sock = this.socket;
+        if (size >= 1) {
+            sock = ChatServer.allSocketOnLine.keySet().stream()
+                    .filter(s -> s == this.socket)
+                    .skip(new Random().nextInt(size - 1))
+                    .findFirst()
+                    .orElse(this.socket);
+        }
+        String userName = ChatServer.allSocketOnLine.get(sock).getUserName();
         sendMsgToCurrentSocket("你随机聊的目标为" + userName);
         sendMsgToOneUser(userName, privateMsg);
     }
