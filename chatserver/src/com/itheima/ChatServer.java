@@ -47,7 +47,7 @@ public class ChatServer {
                 try {
                     socket = ss.accept();
                 } catch (SocketTimeoutException e) {
-                    System.out.println(millisecond / 1000.0 + "秒内无客户端连接到此");
+                    //System.out.println(millisecond / 1000.0 + "秒内无客户端连接到此");
                     if (Thread.currentThread().isInterrupted()) {
                         ss.close();
                         break;
@@ -73,13 +73,15 @@ public class ChatServer {
             return;
         }
         Object obj;
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("user.txt"))) {
-            while (ois.available() > 0) {
+        try (FileInputStream fileInputStream = new FileInputStream("user.txt");
+             ObjectInputStream ois = new ObjectInputStream(fileInputStream)) {
+            while (fileInputStream.available() > 0) {
                 obj = ois.readObject();
                 users.add((User) obj);
             }
             System.out.println("已根据user.txt文件, 完成初始化流程");
-        } catch (IOException | ClassNotFoundException e) {
+            System.out.println("users内容: " + users);
+        } catch (ClassNotFoundException | IOException e) {
             e.printStackTrace();
         }
     }
@@ -92,6 +94,7 @@ public class ChatServer {
             for (User user : users) {
                 oos.writeObject(user);
             }
+            System.out.println("users内容: " + users);
             System.out.println("已保存用户信息到user.txt");
         } catch (IOException e) {
             e.printStackTrace();

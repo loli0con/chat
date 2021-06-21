@@ -30,6 +30,7 @@ public class ChatServerThread extends Thread {
                     this.socket.shutdownOutput();
                     this.socket.close();
                     ChatServer.allSocketOnLine.remove(this.socket);
+                    break;
                 }
 
                 // 拦截游客访问用户的功能
@@ -156,7 +157,7 @@ public class ChatServerThread extends Thread {
         int size = ChatServer.allSocketOnLine.size();
         String privateMsg = br.readLine();
         Socket sock = this.socket;
-        if (size >= 1) {
+        if (size > 1) {
             sock = ChatServer.allSocketOnLine.keySet().stream()
                     .filter(s -> s == this.socket)
                     .skip(new Random().nextInt(size - 1))
