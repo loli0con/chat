@@ -26,10 +26,12 @@ public class ChatServerThread extends Thread {
 
                 if (Objects.isNull(flag)) {
                     this.socket.shutdownInput();
-                    this.socket.getOutputStream().flush();
-                    this.socket.shutdownOutput();
+                    if (!this.socket.isOutputShutdown()) { // 客户端主动关闭
+                        this.socket.getOutputStream().flush();
+                        this.socket.shutdownOutput();
+                        ChatServer.allSocketOnLine.remove(this.socket);
+                    }
                     this.socket.close();
-                    ChatServer.allSocketOnLine.remove(this.socket);
                     break;
                 }
 

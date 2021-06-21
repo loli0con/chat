@@ -33,7 +33,7 @@ public class ChatServer {
     public static void main(String[] args) {
 
         loadUsers();
-        int millisecond = 2000;
+        int millisecond = 3000;
 
         try {
             ss = new ServerSocket(9999);
@@ -105,18 +105,13 @@ public class ChatServer {
         // 程序结束时
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             main_thread.interrupt();
-            while (ss.isClosed()) ;
+            while (!ss.isClosed()) ;
             saveUsers();
             for (Socket socket : allSocketOnLine.keySet()) {
                 try {
                     socket.getOutputStream().flush();
                     socket.shutdownOutput();
-                    if (!socket.isInputShutdown()) {
-                        socket.shutdownInput();
-                    }
-                    if (!socket.isClosed()) {
-                        socket.close();
-                    }
+                    while (!socket.isClosed()) ;
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
