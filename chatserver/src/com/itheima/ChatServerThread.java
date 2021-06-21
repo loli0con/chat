@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
-import java.util.Set;
+import java.util.*;
 
 public class ChatServerThread extends Thread {
     private Socket socket;
@@ -37,6 +37,9 @@ public class ChatServerThread extends Thread {
                     case "300": // 300: 客户端获取已上线的所有用户
                         doAllOnlineUser(br);
                         break;
+                    case "301": // 300: 客户端获取上线用户根据用户名升序排序
+                        doAllOnlineUserOrderByUserName(br);
+                        break;
                 }
             }
         } catch (Exception e) {
@@ -57,6 +60,23 @@ public class ChatServerThread extends Thread {
     private void doAllOnlineUser(BufferedReader br) throws Exception {
         // 得到已上线的所有用户
         String users = ChatServer.allSocketOnLine.values().toString();
+
+        // 得到客户端对应的用户名
+        User user = ChatServer.allSocketOnLine.get(socket);
+        String userName = user.getUserName();
+
+        // 发给请求的那个客户端
+        sendMsgToOneClient(userName, "当前所有在线用户:" + users);
+    }
+
+    // 获取上线用户根据用户名升序排序
+    private void doAllOnlineUserOrderByUserName(BufferedReader br) throws Exception {
+        // 得到已上线的所有用户
+        Collection<User> userCollection = ChatServer.allSocketOnLine.values();
+        List<User> userList = new ArrayList<>(userCollection);
+        // 排序
+        userList.sort(Comparator.comparing(User::getUserName));
+        String users = userList.toString();
 
         // 得到客户端对应的用户名
         User user = ChatServer.allSocketOnLine.get(socket);
@@ -102,8 +122,7 @@ public class ChatServerThread extends Thread {
     }
 
     /**
-     *
-     * @param destName 单聊的用户
+     * @param destName   单聊的用户
      * @param privateMsg 单聊的消息
      */
     private void sendMsgToOneClient(String destName, String privateMsg) throws Exception {
