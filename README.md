@@ -12,3 +12,5 @@ a simple chat program
 修改了[User](chatserver/src/com/itheima/User.java)的模型，增加密码字段
 
 没测试过代码，太累了，肝到4点。
+
+working directory：chat根目录下
