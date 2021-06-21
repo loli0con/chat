@@ -108,7 +108,18 @@ public class ChatServerThread extends Thread {
 
     // 101: 注册
     private void doRegister(BufferedReader br) throws Exception {
-        // TODO
+        String userName = br.readLine();
+        String sex = br.readLine();
+        int age = Integer.parseInt(br.readLine());
+        String password = br.readLine();
+
+        User new_user = new User(userName, sex, age, password);
+        if (ChatServer.users.add(new_user)) {
+            sendMsgToCurrentGuest("恭喜您:" + userName + ", 注册成功!");
+        } else {
+            sendMsgToCurrentGuest(userName + "用户已经存在，注册失败!");
+
+        }
     }
 
 
