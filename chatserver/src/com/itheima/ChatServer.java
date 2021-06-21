@@ -3,6 +3,8 @@ package com.itheima;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -23,10 +25,20 @@ public class ChatServer {
     // 存放用户信息
     public static Set<User> users = new CopyOnWriteArraySet<>();
 
+    // serverSocket
+    private static ServerSocket ss;
+
+
     public static void main(String[] args) {
+
+        loadUsers();
+
         try {
-            ServerSocket ss = new ServerSocket(9999);
+            ss = new ServerSocket(9999);
             System.out.println("服务端已启动!");
+
+            addShutdownHook();
+
             while (true) {
                 Socket socket = ss.accept();
                 // 为当前登录成功的socket分配一个独立的线程来处理与之通信
@@ -37,10 +49,15 @@ public class ChatServer {
         }
     }
 
+
     /**
      * 加载users集合
      */
     private static void loadUsers() {
+        if (!Files.exists((Paths.get("user.txt")))) {
+            System.out.println("找不到user.txt文件, 无初始化");
+            return;
+        }
         Object obj;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("user.txt"))) {
             while (true) {
@@ -50,6 +67,7 @@ public class ChatServer {
                 }
                 users.add((User) obj);
             }
+            System.out.println("已根据user.txt文件, 完成初始化流程");
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -63,8 +81,40 @@ public class ChatServer {
             for (User user : users) {
                 oos.writeObject(user);
             }
+            System.out.println("已保存用户信息到user.txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void addShutdownHook() {
+        // 程序结束时
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (!ss.isClosed()) {
+                try {
+                    ss.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            saveUsers();
+            for (Socket socket : allSocketOnLine.keySet()) {
+                try {
+                    socket.getOutputStream().flush();
+                    if (!socket.isInputShutdown()) {
+                        socket.shutdownInput();
+                    }
+                    if (!socket.isOutputShutdown()) {
+                        socket.shutdownOutput();
+                    }
+                    if (!socket.isClosed()) {
+                        socket.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("释放所有资源");
+        }));
     }
 }
