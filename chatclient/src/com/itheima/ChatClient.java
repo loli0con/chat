@@ -1,35 +1,37 @@
 package com.itheima;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
 
 /**
-    实现客户端的开发
-    客户端有两个功能:
-        1.客户端可以收到服务端发送的各种消息,并打印
-        2.客户端发送各种消息给服务端
-
-    客户端和服务端消息通信规则约定(简称通信码):
-         100: 表示登陆
-         101: 表示注册
-
-         200: 表示单聊
-         201: 表示群聊
-         202: 表示随机聊
-
-         300: 客户端获取已上线的所有用户
-         301: 客户端获取上线用户根据用户名升序排序
-         302: 客户端获取指定性别的上线用户
-
-         举例:客户端给服务端发送100,表示客户端要进行登录操作
+ * 实现客户端的开发
+ * 客户端有两个功能:
+ * 1.客户端可以收到服务端发送的各种消息,并打印
+ * 2.客户端发送各种消息给服务端
+ * <p>
+ * 客户端和服务端消息通信规则约定(简称通信码):
+ * 100: 表示登陆
+ * 101: 表示注册
+ * <p>
+ * 200: 表示单聊
+ * 201: 表示群聊
+ * 202: 表示随机聊
+ * <p>
+ * 300: 客户端获取已上线的所有用户
+ * 301: 客户端获取上线用户根据用户名升序排序
+ * 302: 客户端获取指定性别的上线用户
+ * <p>
+ * 举例:客户端给服务端发送100,表示客户端要进行登录操作
  */
 public class ChatClient {
+    private static Socket socket;
+
     public static void main(String[] args) {
         try {
-
             // 1.创建于服务端的Socket,并保存到成员变量
-            Socket socket = new Socket("127.0.0.1", 9999);
+            socket = new Socket("127.0.0.1", 9999);
             System.out.println("连接服务器成功!");
 
             // 2.分配一个线程为客户端socket服务接收服务端发来的消息
@@ -62,6 +64,7 @@ public class ChatClient {
                         login(ps);
                         break;
                     case "2": // 2.表示注册
+                        register(ps);
                         break;
                     case "3": // 3.表示单聊
                         sendOne(ps);
@@ -70,15 +73,19 @@ public class ChatClient {
                         sendAll(ps);
                         break;
                     case "5": // 5.表示随机聊
+                        sendSomeone(ps);
                         break;
                     case "6": // 6.获取上线用户根据用户名升序排序
+                        getAllOnlineUserOrderByName(ps);
                         break;
                     case "7": // 7.获取指定性别的上线用户
+                        getAllOnlineUserFilterBySex(ps);
                         break;
                     case "8": // 8.获取已上线的所有用户
                         getAllOnlineUser(ps);
                         break;
                     case "9": // 9.退出
+                        closeClient();
                         break;
                     default:
                         System.out.println("没有这样的操作!");
@@ -90,16 +97,58 @@ public class ChatClient {
         }
     }
 
-    // 获取所有已上线的用户
-    private static void getAllOnlineUser(PrintStream ps) {
-        System.out.println("进入获取所有已上线的用户");
-        // 300: 客户端获取已上线的所有用户
-        ps.println("300"); // 发送指令
+    // 1.表示登陆
+    public static void login(PrintStream ps) {
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("请输入用户名：");
+        String name = sc.nextLine();
+        System.out.println("请输入密码：");
+        String password = sc.nextLine();
+
+        // 100: 表示登陆
+        ps.println("100");
+        ps.println(name + "," + password);
         ps.flush();
     }
 
+    // 2.表示注册
+    public static void register(PrintStream ps) {
+        Scanner sc = new Scanner(System.in);
 
-    // 单聊
+        System.out.println("请输入注册的用户名称(首字母为a-z或A-Z,其它部分可以为字母、数字或者下划线，长度在10个字符以内)：");
+        String name = sc.nextLine();
+        while (true) {
+            if (name.matches("^[a-zA-Z][a-zA-Z0-9_]{0,9}$")) {
+                break;
+            }
+            System.out.println("您输入的用户名不符合要求,请重新输入:");
+            name = sc.nextLine();
+        }
+        System.out.println("请输入登录性别：");
+        String sex = sc.nextLine();
+        System.out.println("请输入登录年龄：");
+        String age = sc.nextLine();
+        System.out.println("请输入密码(同用户名要求)：");
+        String password = sc.nextLine();
+        while (true) {
+            if (password.matches("^[a-zA-Z][a-zA-Z0-9_]{0,9}$")) {
+                break;
+            }
+            System.out.println("您输入的密码不符合要求,请重新输入!");
+            password = sc.nextLine();
+        }
+
+        // 101: 表示注册
+        ps.println("101");
+        ps.println(name);
+        ps.println(sex);
+        ps.println(age);
+        ps.println(password);
+        ps.flush();
+    }
+
+    // 3.表示单聊
     private static void sendOne(PrintStream ps) {
         System.out.println("进入单聊");
         Scanner sc = new Scanner(System.in);
@@ -117,7 +166,7 @@ public class ChatClient {
         ps.flush();
     }
 
-    // 群聊
+    // 4.表示群聊
     private static void sendAll(PrintStream ps) {
         System.out.println("进入群聊");
         Scanner sc = new Scanner(System.in);
@@ -131,19 +180,54 @@ public class ChatClient {
         ps.flush();
     }
 
-    public static void login(PrintStream ps) {
+    // 5.表示随机聊
+    private static void sendSomeone(PrintStream ps) {
+        System.out.println("进入单聊");
         Scanner sc = new Scanner(System.in);
 
-        System.out.println("请输入登录名称：");
-        String name = sc.nextLine();
-        System.out.println("请输入登录性别：");
-        String sex = sc.nextLine();
-        System.out.println("请输入登录年龄：");
-        String age = sc.next();
+        System.out.println("请输入消息：");
+        String msg = sc.nextLine();
 
-        // 100: 表示登陆
-        ps.println("100");
-        ps.println(name + "," + sex + "," + age);
+        // 201: 表示随机聊
+        ps.println("202");
+        ps.println(msg);
         ps.flush();
+    }
+
+    // 6.获取上线用户根据用户名升序排序
+    private static void getAllOnlineUserOrderByName(PrintStream ps) {
+        System.out.println("进入获取上线用户根据用户名升序排序");
+
+        // 301: 客户端获取上线用户根据用户名升序排序
+        ps.println("301"); // 发送指令
+        ps.flush();
+    }
+
+    // 7.获取指定性别的上线用户
+    private static void getAllOnlineUserFilterBySex(PrintStream ps) {
+        System.out.println("进入获取指定性别的上线用户");
+        Scanner sc = new Scanner(System.in);
+
+        System.out.println("请输入性别：");
+        String sex = sc.nextLine();
+
+        // 302: 客户端获取指定性别的上线用户
+        ps.println("302"); // 发送指令
+        ps.println(sex);
+        ps.flush();
+    }
+
+    // 8.获取已上线的所有用户
+    private static void getAllOnlineUser(PrintStream ps) {
+        System.out.println("进入获取所有已上线的用户");
+
+        // 300: 客户端获取已上线的所有用户
+        ps.println("300"); // 发送指令
+        ps.flush();
+    }
+
+    // 9.退出
+    private static void closeClient() throws IOException {
+        socket.close();
     }
 }
