@@ -150,6 +150,7 @@ public class ChatServerThread extends Thread {
                 .findFirst()
                 .orElse(this.socket);
         String userName = ChatServer.allSocketOnLine.get(socket).getUserName();
+        sendMsgToCurrentSocket("你随机聊的目标为" + userName);
         sendMsgToOneUser(userName, privateMsg);
     }
 
