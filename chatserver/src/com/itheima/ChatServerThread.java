@@ -84,7 +84,24 @@ public class ChatServerThread extends Thread {
         String userName = user.getUserName();
 
         // 发给请求的那个客户端
-        sendMsgToOneClient(userName, "当前所有在线用户:" + users);
+        sendMsgToOneClient(userName, "根据用户名排序的用户:" + users);
+    }
+
+    private void doAllOnlineUserFilterBySex(BufferedReader br) throws Exception {
+        // 得到目标性别
+        String sex = br.readLine();
+        // 得到已上线的所有用户
+        Collection<User> userCollection = ChatServer.allSocketOnLine.values();
+        List<User> userList = new ArrayList<>(userCollection);
+        userList.removeIf(user -> user.getSex().equals(sex));
+        String users = userList.toString();
+
+        // 得到客户端对应的用户名
+        User user = ChatServer.allSocketOnLine.get(socket);
+        String userName = user.getUserName();
+
+        // 发给请求的那个客户端
+        sendMsgToOneClient(userName, "已上线的" + sex + "性用户:" + users);
     }
 
     // 群聊
