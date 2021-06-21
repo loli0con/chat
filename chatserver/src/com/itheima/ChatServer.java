@@ -34,4 +34,18 @@ public class ChatServer {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 加载users集合
+     */
+    private static void loadUsers() {
+        // TODO
+    }
+
+    /**
+     * 保存users集合
+     */
+    private static void saveUsers() {
+        // TODO
+    }
 }
