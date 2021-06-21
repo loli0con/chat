@@ -28,18 +28,9 @@ import java.util.Scanner;
 
 public class CommandReader extends Thread {
     private Socket socket;
-    private volatile Thread main_thread;
 
     public CommandReader() {
 
-    }
-
-    public Thread getMain_thread() {
-        return main_thread;
-    }
-
-    public void setMain_thread(Thread main_thread) {
-        this.main_thread = main_thread;
     }
 
     public Socket getSocket() {
@@ -60,6 +51,8 @@ public class CommandReader extends Thread {
             // 用户可以循环操作
             while (true) {
                 if (Thread.currentThread().isInterrupted()) {
+                    socket.shutdownOutput();
+                    socket.close();
                     break;
                 }
                 // 3.打印操作信息

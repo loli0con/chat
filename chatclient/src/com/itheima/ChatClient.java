@@ -15,13 +15,15 @@ public class ChatClient {
             CommandReader commandReader = new CommandReader();
             commandReader.setDaemon(true);
             commandReader.setSocket(socket);
-            commandReader.setMain_thread(Thread.currentThread());
 
             // 2.分配一个线程为客户端socket服务接收服务端发来的消息
             ChatClientReaderThread chatClientReaderThread = new ChatClientReaderThread(socket);
 
             commandReader.start();
             chatClientReaderThread.start();
+
+            chatClientReaderThread.join();
+            commandReader.interrupt();
 
         } catch (Exception e) {
             e.printStackTrace();

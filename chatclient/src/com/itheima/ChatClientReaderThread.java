@@ -21,12 +21,11 @@ public class ChatClientReaderThread extends Thread {
                 System.out.println("你收到消息: " + msg);
             }
             socket.shutdownInput();
-            if (!socket.isOutputShutdown()) {
-                socket.getOutputStream().flush();
-                socket.shutdownOutput();
-            }
-            socket.close();
-            System.out.println("客户端已关闭");
+//            if (!socket.isOutputShutdown()) {
+//                socket.getOutputStream().flush();
+//                socket.shutdownOutput();
+//            }
+//            socket.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
