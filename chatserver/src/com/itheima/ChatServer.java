@@ -3,9 +3,11 @@ package com.itheima;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -31,19 +33,31 @@ public class ChatServer {
     public static void main(String[] args) {
 
         loadUsers();
+        int millisecond = 2000;
 
         try {
             ss = new ServerSocket(9999);
-            System.out.println("服务端已启动!");
+            ss.setSoTimeout(millisecond);
 
-            addShutdownHook();
+            System.out.println("服务端已启动!");
+            addShutdownHook(Thread.currentThread());
 
             while (true) {
-                Socket socket = ss.accept();
+                Socket socket = null;
+                try {
+                    socket = ss.accept();
+                } catch (SocketTimeoutException e) {
+                    System.out.println(millisecond / 1000.0 + "秒内无客户端连接到此");
+                    if (Thread.currentThread().isInterrupted()) {
+                        ss.close();
+                        break;
+                    }
+                }
                 // 为当前登录成功的socket分配一个独立的线程来处理与之通信
-                new ChatServerThread(socket).start();
+                if (!Objects.isNull(socket)) {
+                    new ChatServerThread(socket).start();
+                }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -84,25 +98,18 @@ public class ChatServer {
         }
     }
 
-    private static void addShutdownHook() {
+    private static void addShutdownHook(Thread main_thread) throws InterruptedException {
         // 程序结束时
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (!ss.isClosed()) {
-                try {
-                    ss.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            main_thread.interrupt();
+            while (ss.isClosed()) ;
             saveUsers();
             for (Socket socket : allSocketOnLine.keySet()) {
                 try {
                     socket.getOutputStream().flush();
+                    socket.shutdownOutput();
                     if (!socket.isInputShutdown()) {
                         socket.shutdownInput();
-                    }
-                    if (!socket.isOutputShutdown()) {
-                        socket.shutdownOutput();
                     }
                     if (!socket.isClosed()) {
                         socket.close();

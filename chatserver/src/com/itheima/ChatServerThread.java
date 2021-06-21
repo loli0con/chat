@@ -25,10 +25,11 @@ public class ChatServerThread extends Thread {
                 String flag = br.readLine();
 
                 if (Objects.isNull(flag)) {
-                    System.out.println(this.socket + "主动关闭");
-                    this.socket.getOutputStream().flush();
                     this.socket.shutdownInput();
+                    this.socket.getOutputStream().flush();
                     this.socket.shutdownOutput();
+                    this.socket.close();
+                    ChatServer.allSocketOnLine.remove(this.socket);
                 }
 
                 // 拦截游客访问用户的功能
