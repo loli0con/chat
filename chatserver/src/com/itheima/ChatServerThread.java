@@ -23,12 +23,20 @@ public class ChatServerThread extends Thread {
             while (true) {
                 // 读取客户端发送过来的指令
                 String flag = br.readLine();
+
+                if (Objects.isNull(flag)) {
+                    System.out.println(this.socket + "主动关闭");
+                    this.socket.getOutputStream().flush();
+                    this.socket.shutdownInput();
+                    this.socket.shutdownOutput();
+                }
+
                 // 拦截游客访问用户的功能
                 if (!hasLogin() && Arrays.asList(signal_arr).contains(flag)) {
                     sendMsgToCurrentSocket("尚未登录，无法访问该功能");
                     continue;
                 }
-                System.out.println(flag);
+
                 // 对客户端的指令进行处理
                 switch (flag) {
                     case "100": // 100: 表示登陆

@@ -6,7 +6,6 @@ import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -44,6 +43,7 @@ public class ChatServer {
                 // 为当前登录成功的socket分配一个独立的线程来处理与之通信
                 new ChatServerThread(socket).start();
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -60,11 +60,8 @@ public class ChatServer {
         }
         Object obj;
         try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("user.txt"))) {
-            while (true) {
+            while (ois.available() > 0) {
                 obj = ois.readObject();
-                if (Objects.isNull(obj)) {
-                    break;
-                }
                 users.add((User) obj);
             }
             System.out.println("已根据user.txt文件, 完成初始化流程");

@@ -97,6 +97,11 @@ public class ChatClient {
         }
     }
 
+    // 0.查看聊天记录
+    public static void showHistory() {
+        // TODO
+    }
+
     // 1.表示登陆
     public static void login(PrintStream ps) {
         Scanner sc = new Scanner(System.in);
@@ -228,6 +233,6 @@ public class ChatClient {
 
     // 9.退出
     private static void closeClient() throws IOException {
-        socket.close();
+        socket.shutdownInput();
     }
 }
