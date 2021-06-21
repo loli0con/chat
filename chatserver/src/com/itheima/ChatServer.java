@@ -4,6 +4,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
     服务端实现的需求：
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 public class ChatServer {
     // 存放登录信息, 键是Socket,值用户信息
-    public static Map<Socket, User> allSocketOnLine = new HashMap<>();
+    public static Map<Socket, User> allSocketOnLine = new ConcurrentHashMap<>();
 
     public static void main(String[] args) {
         try {
